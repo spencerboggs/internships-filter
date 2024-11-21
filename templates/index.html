@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internships Table</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <h1>Internship Listings</h1>
+    <div class="note">
+        <p><a href="https://github.com/cvrve/Summer2025-Internships/tree/dev" target="_blank">Original Repository</a></p>
+        <p>Filter by company, role, or location. Use a minus sign (-) to exclude results.</p>
+        <p>Ex: -remote in the location filter will remove all entries with a remote option.</p>
+    </div>
+
+    <form method="POST">
+        <input type="text" name="company" placeholder="Filter by company" value="{{ filters['company'] }}">
+        <input type="text" name="role" placeholder="Filter by role" value="{{ filters['role'] }}">
+        <input type="text" name="location" placeholder="Filter by location" value="{{ filters['location'] }}">
+        <button type="submit">Apply Filters</button>
+        <button type="submit" name="clear_filters" value="true">Clear Filters</button>
+    </form>
+
+    {% if filters['company'] or filters['role'] or filters['location'] %}
+    <div class="active-filters">
+        <p><strong>Active Filters:</strong></p>
+        <ul>
+            {% if filters['company'] %}
+            <li><strong>Company:</strong> {{ filters['company'] }}</li>
+            {% endif %}
+            {% if filters['role'] %}
+            <li><strong>Role:</strong> {{ filters['role'] }}</li>
+            {% endif %}
+            {% if filters['location'] %}
+            <li><strong>Location:</strong> {{ filters['location'] }}</li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <h2>{{ result_count }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Location</th>
+                <th>Application Link</th>
+                <th>Date Posted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_data %}
+            <tr>
+                <td>{{ row['Company'] }}</td>
+                <td>{{ row['Role'] }}</td>
+                <td>{{ row['Location']|safe }}</td>
+                <td>{{ row['Application/Link']|safe }}</td>
+                <td>{{ row['Date Posted'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
