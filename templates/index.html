@@ -46,6 +46,7 @@
     {% endif %}
 
     <h2>{{ result_count }}</h2>
+    <button class="index-button" id="refreshButton">Refresh Internships</button>
     <table>
         <thead>
             <tr>
@@ -75,6 +76,23 @@
 </body>
 
 <script>
+    document.getElementById('refreshButton').addEventListener('click', function () {
+            fetch('/refresh_internships', { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // alert('Internships refreshed successfully!');
+                        location.reload();
+                    } else {
+                        alert('Failed to refresh internships.');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred while refreshing the internships.");
+                });
+        });
+
     document.addEventListener('DOMContentLoaded', function () {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][name="applied"]');
             checkboxes.forEach(checkbox => {

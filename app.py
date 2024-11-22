@@ -7,19 +7,34 @@ import os
 app = Flask(__name__)
 
 GITHUB_README_URL = "https://raw.githubusercontent.com/cvrve/Summer2025-Internships/main/README.md"
-DATA_FILE = "data.json"
+INTERNSHIP_DATA_FILE = "internships.json"
+APPLIED_JOBS_FILE = "data.json"
 
-def check_file():
-    if not os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "w") as file:
+def check_applied_jobs_file():
+    if not os.path.exists(APPLIED_JOBS_FILE):
+        with open(APPLIED_JOBS_FILE, "w") as file:
             json.dump([], file)
 
-def load_application_data():
-    with open(DATA_FILE, "r") as file:
+def check_internships_file():
+    if not os.path.exists(INTERNSHIP_DATA_FILE) or os.path.getsize(INTERNSHIP_DATA_FILE) == 0:
+        table_data = fetch_table_from_readme()
+        table_data = replace_arrow_with_valid_company(table_data)
+        save_internship_data(table_data)
+
+def load_applied_jobs_data():
+    with open(APPLIED_JOBS_FILE, "r") as file:
         return json.load(file)
 
-def save_application_data(data):
-    with open(DATA_FILE, "w") as file:
+def save_applied_jobs_data(data):
+    with open(APPLIED_JOBS_FILE, "w") as file:
+        json.dump(data, file)
+
+def load_internship_data():
+    with open(INTERNSHIP_DATA_FILE, "r") as file:
+        return json.load(file)
+
+def save_internship_data(data):
+    with open(INTERNSHIP_DATA_FILE, "w") as file:
         json.dump(data, file)
 
 def fetch_table_from_readme():
@@ -50,20 +65,35 @@ def fetch_table_from_readme():
     else:
         return []
 
+def replace_arrow_with_valid_company(table_data):
+    last_valid_company = ""
+    for row in table_data:
+        if row["Company"] == "\u21b3":
+            row["Company"] = last_valid_company
+        else:
+            last_valid_company = row["Company"]
+    return table_data
+
 @app.route("/", methods=["GET", "POST"])
 def index():
-    check_file()
-    table_data = fetch_table_from_readme()
-    app_data = load_application_data()
+    check_applied_jobs_file()
+    check_internships_file()
+
+    table_data = load_internship_data()
+    app_data = load_applied_jobs_data()
+
     for row in table_data:
         row['Applied'] = any(app['Company'] == row['Company'] and app['Role'] == row['Role'] for app in app_data)
+
     filters = {
         "company": request.form.get("company", "").lower(),
         "role": request.form.get("role", "").lower(),
         "location": request.form.get("location", "").lower()
     }
+
     def is_negative_filter(filter_value):
         return filter_value.startswith("-")
+
     if filters["company"]:
         if is_negative_filter(filters["company"]):
             table_data = [row for row in table_data if filters["company"][1:] not in row["Company"].lower()]
@@ -79,9 +109,14 @@ def index():
             table_data = [row for row in table_data if filters["location"][1:] not in row["Location"].lower()]
         else:
             table_data = [row for row in table_data if filters["location"] in row["Location"].lower()]
+
+    table_data = replace_arrow_with_valid_company(table_data)
+
     table_data = [row for row in table_data if '🔒' not in row["Application/Link"]]
+
     result_count = str(len(table_data)) + " internships found"
     result_count = result_count if len(table_data) > 1 else str(len(table_data)) + " internship found"
+
     for row in table_data:
         for key in row:
             if key == "Location":
@@ -90,14 +125,17 @@ def index():
                 row[key] = re.sub(r'\*\*.*?\*\*', '', row[key])
             elif key == "Application/Link":
                 row[key] = re.sub(r'<a\s+[^>]*href="([^"]*)"[^>]*>.*?<\s*/a>', r'<a href="\1" target="_blank">Apply</a>', row[key])
+
     if request.method == "POST" and "clear_filters" in request.form:
         return redirect(url_for('index'))
+
     return render_template("index.html", table_data=table_data, filters=filters, result_count=result_count)
+
 
 @app.route("/update_status", methods=["POST"])
 def update_status():
-    check_file()
-    app_data = load_application_data()
+    check_applied_jobs_file()
+    app_data = load_applied_jobs_data()
     data = request.json
     entry = {
         "Company": data["Company"],
@@ -111,14 +149,27 @@ def update_status():
             app_data.append(entry)
     else:
         app_data = [app for app in app_data if not (app["Company"] == data["Company"] and app["Role"] == data["Role"])]
-    save_application_data(app_data)
+    save_applied_jobs_data(app_data)
     return jsonify({"success": True})
 
 @app.route("/saved_jobs")
 def saved_jobs():
-    check_file()
-    saved_jobs = load_application_data()
+    check_applied_jobs_file()
+    saved_jobs = load_applied_jobs_data()
     return render_template("applied.html", saved_jobs=saved_jobs)
+
+
+@app.route("/refresh_internships", methods=["GET"])
+def refresh_internships():
+    try:
+        table_data = fetch_table_from_readme()
+        table_data = replace_arrow_with_valid_company(table_data)
+        save_internship_data(table_data)
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"Error refreshing internships: {e}")
+        return jsonify({"success": False})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
