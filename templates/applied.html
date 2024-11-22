@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Jobs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body class="applied-jobs">
+    <h1>Applied Jobs</h1>
+    <a class="index-button" href="{{ url_for('index') }}">Back to Internship Listings</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Application Link</th>
+                <th>Location</th>
+                <th>Date Posted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in saved_jobs %}
+            <tr>
+                <td>{{ job['Company'] }}</td>
+                <td>{{ job['Role'] }}</td>
+                <td><a href="{{ job['Application/Link'] }}" target="_blank">View Application</a></td>
+                <td>{{ job['Location'] }}</td>
+                <td>{{ job['Date'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

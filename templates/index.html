@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
-<body>
+<body class="index-page">
     <h1>Internship Listings</h1>
+
     <div class="note">
         <p><a href="https://github.com/cvrve/Summer2025-Internships/tree/dev" target="_blank">Original Repository</a></p>
         <p>Filter by company, role, or location. Use a minus sign (-) to exclude results.</p>
@@ -22,6 +23,9 @@
         <input type="text" name="location" placeholder="Filter by location" value="{{ filters['location'] }}">
         <button type="submit">Apply Filters</button>
         <button type="submit" name="clear_filters" value="true">Clear Filters</button>
+        <a href="{{ url_for('saved_jobs') }}">
+            <button type="button">View Applied Jobs</button>
+        </a>
     </form>
 
     {% if filters['company'] or filters['role'] or filters['location'] %}
@@ -45,6 +49,7 @@
     <table>
         <thead>
             <tr>
+                <th>Applied</th>
                 <th>Company</th>
                 <th>Role</th>
                 <th>Location</th>
@@ -55,6 +60,9 @@
         <tbody>
             {% for row in table_data %}
             <tr>
+                <td>
+                    <input type="checkbox" name="applied" {% if row['Applied'] %}checked{% endif %} data-id="{{ loop.index0 }}">
+                </td>
                 <td>{{ row['Company'] }}</td>
                 <td>{{ row['Role'] }}</td>
                 <td>{{ row['Location']|safe }}</td>
@@ -65,5 +73,51 @@
         </tbody>
     </table>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="applied"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const rowIndex = this.getAttribute('data-id');
+                    const row = this.closest('tr');
+                    const company = row.children[1].innerText.trim();
+                    const role = row.children[2].innerText.trim();
+                    const location = row.children[3].innerText.trim();
+                    const link = row.children[4].querySelector('a').href;
+                    const date = row.children[5].innerText.trim();
+                    const applied = this.checked;
+
+                    fetch('/update_status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            Company: company,
+                            Role: role,
+                            Location: location,
+                            "Application/Link": link,
+                            Date: date,
+                            Applied: applied
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                alert("Failed to update status");
+                                this.checked = !applied;
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            alert("An error occurred while updating the status.");
+                            this.checked = !applied;
+                        });
+                });
+            });
+        });
+
+</script>
 
 </html>
