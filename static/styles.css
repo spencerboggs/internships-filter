@@ -20,6 +20,7 @@ form {
     justify-content: center;
     gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 form input[type="text"] {
@@ -52,7 +53,7 @@ body.index-page table {
 
 body.applied-jobs table {
     margin: 0 auto;
-    width: 60%;
+    width: 80%;
     table-layout: fixed;
     border: 1px solid #333;
     border-collapse: collapse;
