@@ -1,10 +1,12 @@
 # Internships Filter
-A Flask app that fetches and displays internship listings from a GitHub README file. The user can filter the listings by company, role, and location. Additionally, users can exclude specific filters (ex. -remote to exclude remote internships) for more refined results.
+A Flask app that fetches and displays internship listings from GitHub README files. The user can filter the listings by company, role, and location. Additionally, users can exclude specific filters (ex. -remote to exclude remote internships) for more refined results.
 
-You can view the original repository, which the data is collected from, [here](https://github.com/cvrve/Summer2025-Internships/tree/dev).
+You can view the original repositories, which the data is collected from, here: 
+* [Cvrve & Ouckah Repo](https://github.com/cvrve/Summer2025-Internships/tree/dev)
+* [Pitt CSC & Simplify Repo](https://github.com/SimplifyJobs/Summer2025-Internships/tree/dev)
 
 ## Features
-* Fetch Internship Data: Collects internship listings from a GitHub README file and displays them in a table.
+* Fetch Internship Data: Collects internship listings from GitHub Internship README repositories and displays them in a table.
 * Filter Listings: Filter internships by company, role, or location. Supports negative filters like -remote to exclude specific entries.
 * Clear Filters: Resets applied filters for a fresh search.
 * Interactive Web Interface: View detailed internship information, including company, role, location, application link, and date posted.
