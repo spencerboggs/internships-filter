@@ -156,7 +156,10 @@ def update_status():
 def saved_jobs():
     check_applied_jobs_file()
     saved_jobs = load_applied_jobs_data()
-    return render_template("applied.html", saved_jobs=saved_jobs)
+    saved_jobs = saved_jobs[::-1]
+    saved_jobs_length = str(len(saved_jobs)) + " internships"
+    saved_jobs_length = saved_jobs_length if len(saved_jobs) > 1 else str(len(saved_jobs)) + " internship"
+    return render_template("applied.html", saved_jobs=saved_jobs, saved_jobs_length=saved_jobs_length)
 
 
 @app.route("/refresh_internships", methods=["GET"])
