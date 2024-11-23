@@ -218,14 +218,19 @@ table a:hover {
 
 .note a {
     display: inline-block;
-    padding: 10px;
+    padding: 8px 16px;
+    width: 200px;
     background-color: #3498db;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     text-decoration: none;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
+}
+
+.note a:hover {
+    background-color: #2980b9;
 }
 
 .active-filters {

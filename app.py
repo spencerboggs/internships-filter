@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import plotly.graph_objects as go
+from datetime import datetime
 import requests
 import re
 import json
@@ -9,7 +10,8 @@ app = Flask(__name__)
 
 # "https://raw.githubusercontent.com/SimplifyJobs/Summer2025-Internships/refs/heads/dev/README.md"
 GITHUB_README_URLS = [
-    "https://raw.githubusercontent.com/cvrve/Summer2025-Internships/main/README.md"
+    "https://raw.githubusercontent.com/cvrve/Summer2025-Internships/main/README.md",
+    "https://raw.githubusercontent.com/SimplifyJobs/Summer2025-Internships/refs/heads/dev/README.md"
 ]
 INTERNSHIP_DATA_FILE = "internships.json"
 APPLIED_JOBS_FILE = "data.json"
@@ -91,6 +93,18 @@ def merge_internship_data(table_data):
         if key not in seen:
             seen.add(key)
             unique_data.append(row)
+    
+    for row in unique_data:
+        try:
+            row["Parsed Date"] = datetime.strptime(row["Date Posted"], "%b %d")
+        except ValueError:
+            row["Parsed Date"] = None
+    
+    unique_data.sort(key=lambda x: (x["Parsed Date"] is None, x["Parsed Date"]), reverse=True)
+
+    for row in unique_data:
+        del row["Parsed Date"]
+    
     return unique_data
 
 def update_existing_entries():
@@ -152,7 +166,12 @@ def index():
                 row[key] = re.sub(r'<(?!br\s*/?)[^<]+?>', '', row[key])
                 row[key] = re.sub(r'\*\*.*?\*\*', '', row[key])
             elif key == "Application/Link":
+                row[key] = re.sub(r'(<a\s+[^>]*href="[^"]*"[^>]*>.*?<\s*/a>).*(<a\s+[^>]*href="[^"]*"[^>]*>.*?<\s*/a>)', r'\1', row[key])
                 row[key] = re.sub(r'<a\s+[^>]*href="([^"]*)"[^>]*>.*?<\s*/a>', r'<a href="\1" target="_blank">Apply</a>', row[key])
+            elif key == "Company":
+                row[key] = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", row[key])
+                row[key] = re.sub(r"(\*\*|\*)(.*?)(\*\*|\*)", r"\2", row[key])
+                row[key] = row[key].strip()
 
     if request.method == "POST" and "clear_filters" in request.form:
         return redirect(url_for('index'))
