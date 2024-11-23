@@ -24,9 +24,11 @@ def check_internships_file():
         all_table_data = []
         for url in GITHUB_README_URLS:
             table_data = fetch_table_from_readme(url)
+            table_data = replace_arrow_with_valid_company(table_data)
             all_table_data.extend(table_data)
         merged_data = merge_internship_data(all_table_data)
         save_internship_data(merged_data)
+
 
 def load_applied_jobs_data():
     with open(APPLIED_JOBS_FILE, "r") as file:
@@ -198,6 +200,7 @@ def refresh_internships():
         all_table_data = []
         for url in GITHUB_README_URLS:
             table_data = fetch_table_from_readme(url)
+            table_data = replace_arrow_with_valid_company(table_data)
             all_table_data.extend(table_data)
         merged_data = merge_internship_data(all_table_data)
         save_internship_data(merged_data)
@@ -205,6 +208,7 @@ def refresh_internships():
     except Exception as e:
         print(f"Error refreshing internships: {e}")
         return jsonify({"success": False})
+
 
 @app.route("/sankey_diagram")
 def sankey_diagram():
