@@ -172,6 +172,8 @@ def index():
                 row[key] = re.sub(r"(\*\*|\*)(.*?)(\*\*|\*)", r"\2", row[key])
                 row[key] = row[key].strip()
 
+    table_data = merge_internship_data(table_data)
+
     if request.method == "POST" and "clear_filters" in request.form:
         return redirect(url_for('index'))
 
