@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sankey Diagram</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <h1>Sankey Diagram of Applied Jobs</h1>
+    <a class="index-button" href="{{ url_for('index') }}">Back to Internship Listings</a>
+    <a class="index-button" href="{{ url_for('saved_jobs') }}">View Applied Jobs</a>
+    <h2>You've applied to {{ saved_jobs_length }}</h2>
+    <div>
+        {{ sankey_html|safe }}
+    </div>
+</body>
+
+</html>

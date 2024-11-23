@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+import plotly.graph_objects as go
 import requests
 import re
 import json
@@ -90,6 +91,15 @@ def merge_internship_data(table_data):
             unique_data.append(row)
     return unique_data
 
+def update_existing_entries():
+    app_data = load_applied_jobs_data()
+    for entry in app_data:
+        if "Interviewed" not in entry:
+            entry["Interviewed"] = False
+        if "Hired" not in entry:
+            entry["Hired"] = False
+    save_applied_jobs_data(app_data)
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     check_applied_jobs_file()
@@ -150,20 +160,26 @@ def index():
 @app.route("/update_status", methods=["POST"])
 def update_status():
     check_applied_jobs_file()
+    update_existing_entries()
     app_data = load_applied_jobs_data()
     data = request.json
+    
     entry = {
         "Company": data["Company"],
         "Role": data["Role"],
         "Application/Link": data["Application/Link"],
         "Location": data["Location"],
-        "Date": data["Date"]
+        "Date": data["Date"],
+        "Interviewed": data.get("Interviewed", False),
+        "Hired": data.get("Hired", False)
     }
+
     if data["Applied"]:
         if not any(app for app in app_data if app["Company"] == data["Company"] and app["Role"] == data["Role"]):
             app_data.append(entry)
     else:
         app_data = [app for app in app_data if not (app["Company"] == data["Company"] and app["Role"] == data["Role"])]
+    
     save_applied_jobs_data(app_data)
     return jsonify({"success": True})
 
@@ -189,6 +205,71 @@ def refresh_internships():
     except Exception as e:
         print(f"Error refreshing internships: {e}")
         return jsonify({"success": False})
+
+@app.route("/sankey_diagram")
+def sankey_diagram():
+    check_applied_jobs_file()
+    data = load_applied_jobs_data()
+
+    statuses = ["Applied", "Interviewed", "Not Interviewed", "Hired", "Not Hired"]
+    nodes = statuses
+    node_indices = {node: i for i, node in enumerate(nodes)}
+
+    total_applied = len(data)
+    interviewed = sum(1 for job in data if job.get("Interviewed", False))
+    not_interviewed = total_applied - interviewed
+    hired_from_interviewed = sum(1 for job in data if job.get("Interviewed", False) and job.get("Hired", False))
+    not_hired_from_interviewed = interviewed - hired_from_interviewed
+    hired_from_not_interviewed = sum(1 for job in data if not job.get("Interviewed", False) and job.get("Hired", False))
+    not_hired_from_not_interviewed = not_interviewed - hired_from_not_interviewed
+
+    links = [
+        {"source": node_indices["Applied"], "target": node_indices["Interviewed"], "value": interviewed},
+        {"source": node_indices["Applied"], "target": node_indices["Not Interviewed"], "value": not_interviewed},
+        
+        {"source": node_indices["Interviewed"], "target": node_indices["Hired"], "value": hired_from_interviewed},
+        {"source": node_indices["Interviewed"], "target": node_indices["Not Hired"], "value": not_hired_from_interviewed},
+        
+        {"source": node_indices["Not Interviewed"], "target": node_indices["Hired"], "value": hired_from_not_interviewed},
+        {"source": node_indices["Not Interviewed"], "target": node_indices["Not Hired"], "value": not_hired_from_not_interviewed},
+    ]
+
+    sankey_fig = go.Figure(data=[go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=nodes
+        ),
+        link=dict(
+            source=[link["source"] for link in links],
+            target=[link["target"] for link in links],
+            value=[link["value"] for link in links]
+        )
+    )])
+
+    sankey_fig.update_layout(title_text="Sankey Diagram of Job Applications", font_size=10)
+    sankey_html = sankey_fig.to_html(full_html=False)
+
+    saved_jobs_length = f"{len(data)} applications completed"
+
+    return render_template("sankey.html", sankey_html=sankey_html, saved_jobs_length=saved_jobs_length)
+
+@app.route("/update_interview_offer", methods=["POST"])
+def update_interview_offer():
+    check_applied_jobs_file()
+    app_data = load_applied_jobs_data()
+    data = request.json
+
+    for app in app_data:
+        if app["Company"] == data["Company"] and app["Role"] == data["Role"]:
+            app["Interviewed"] = data["Interviewed"]
+            app["Hired"] = data["Hired"]
+            break
+
+    save_applied_jobs_data(app_data)
+    return jsonify({"success": True})
+
 
 if __name__ == "__main__":
     app.run(debug=True)

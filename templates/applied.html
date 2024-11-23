@@ -11,10 +11,13 @@
 <body class="applied-jobs">
     <h1>Applied Jobs</h1>
     <a class="index-button" href="{{ url_for('index') }}">Back to Internship Listings</a>
+    <a class="index-button" href="{{ url_for('sankey_diagram') }}">View Sankey Diagram</a>
     <h2>You've applied to {{ saved_jobs_length }}</h2>
     <table>
         <thead>
             <tr>
+                <th>Interview</th>
+                <th>Offer</th>
                 <th>Company</th>
                 <th>Role</th>
                 <th>Application Link</th>
@@ -25,6 +28,14 @@
         <tbody>
             {% for job in saved_jobs %}
             <tr>
+                <td>
+                    <input type="checkbox" name="interviewed" {% if job['Interviewed'] %}checked{% endif %}
+                        data-id="{{ loop.index0 }}">
+                </td>
+                <td>
+                    <input type="checkbox" name="hired" {% if job['Hired'] %}checked{% endif %}
+                        data-id="{{ loop.index0 }}">
+                </td>
                 <td>{{ job['Company'] }}</td>
                 <td>{{ job['Role'] }}</td>
                 <td><a href="{{ job['Application/Link'] }}" target="_blank">View Application</a></td>
@@ -35,5 +46,46 @@
         </tbody>
     </table>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const isInterviewed = this.name === 'interviewed';
+                const row = this.closest('tr');
+                const dataId = this.getAttribute('data-id');
+                const company = row.children[2].innerText.trim();
+                const role = row.children[3].innerText.trim();
+                const interviewed = isInterviewed ? this.checked : row.querySelector('input[name="interviewed"]').checked;
+                const hired = !isInterviewed ? this.checked : row.querySelector('input[name="hired"]').checked;
+
+                fetch('/update_interview_offer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Company: company,
+                        Role: role,
+                        Interviewed: interviewed,
+                        Hired: hired
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            alert("Failed to update status");
+                            this.checked = !this.checked;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("An error occurred while updating the status.");
+                        this.checked = !this.checked;
+                    });
+            });
+        });
+    });
+</script>
 
 </html>

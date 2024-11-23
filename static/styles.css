@@ -68,8 +68,8 @@ td {
     min-height: 400px;
 }
 
-th:nth-child(1) input[type="checkbox"],
-td:nth-child(1) input[type="checkbox"] {
+th input[type="checkbox"],
+td input[type="checkbox"] {
     margin: 0;
     padding: 0;
     width: 20px;
@@ -77,47 +77,92 @@ td:nth-child(1) input[type="checkbox"] {
     cursor: pointer;
 }
 
+
+/* Index Page Table */
+/* Applied Checkboxes */
 body.index-page table th:nth-child(1),
 body.index-page table td:nth-child(1) {
     width: 5%;
     text-align: center;
 }
 
-body.applied-jobs table th:nth-child(1),
-body.applied-jobs table td:nth-child(1) {
-    width: 10%;
-}
-
-th:nth-child(2),
-td:nth-child(2) {
+/* Company */
+body.index-page table th:nth-child(2),
+body.index-page table td:nth-child(2) {
     width: 20%;
 }
 
+/* Role */
 body.index-page table th:nth-child(3),
 body.index-page table td:nth-child(3) {
     width: 45%;
 }
 
+/* Location */
+body.index-page table th:nth-child(4),
+body.index-page table td:nth-child(4) {
+    width: 10%;
+}
+
+/* Application Link */
+body.index-page table th:nth-child(5),
+body.index-page table td:nth-child(5) {
+    width: 10%;
+    text-align: center;
+}
+
+/* Date Posted */
+body.index-page table th:nth-child(6),
+body.index-page table td:nth-child(6) {
+    width: 10%;
+}
+
+
+/* Applied Jobs Table */
+/* Interview Checkboxes */
+body.applied-jobs table th:nth-child(1),
+body.applied-jobs table td:nth-child(1) {
+    width: 5%;
+    text-align: center;
+}
+
+/* Offer Checkboxes */
+body.applied-jobs table th:nth-child(2),
+body.applied-jobs table td:nth-child(2) {
+    width: 5%;
+    text-align: center;
+}
+
+/* Company */
 body.applied-jobs table th:nth-child(3),
 body.applied-jobs table td:nth-child(3) {
+    width: 15%;
+}
+
+/* Role */
+body.applied-jobs table th:nth-child(4),
+body.applied-jobs table td:nth-child(4) {
+    width: 40%;
+}
+
+/* Application Link */
+body.applied-jobs table th:nth-child(5),
+body.applied-jobs table td:nth-child(5) {
     width: 10%;
     text-align: center;
 }
 
-th:nth-child(4),
-td:nth-child(4) {
-    width: 10%;
+/* Location */
+body.applied-jobs table th:nth-child(6),
+body.applied-jobs table td:nth-child(6) {
+    width: 15%;
 }
 
-th:nth-child(5),
-td:nth-child(5) {
+/* Date Applied */
+body.applied-jobs table th:nth-child(7),
+body.applied-jobs table td:nth-child(7) {
     width: 10%;
     text-align: center;
-}
-
-th:nth-child(6),
-td:nth-child(6) {
-    width: 10%;
 }
 
 table th {
