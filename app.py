@@ -8,7 +8,6 @@ import os
 
 app = Flask(__name__)
 
-# "https://raw.githubusercontent.com/SimplifyJobs/Summer2025-Internships/refs/heads/dev/README.md"
 GITHUB_README_URLS = [
     "https://raw.githubusercontent.com/cvrve/Summer2025-Internships/main/README.md",
     "https://raw.githubusercontent.com/SimplifyJobs/Summer2025-Internships/refs/heads/dev/README.md"
