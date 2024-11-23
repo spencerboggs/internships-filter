@@ -6,7 +6,10 @@ import os
 
 app = Flask(__name__)
 
-GITHUB_README_URL = "https://raw.githubusercontent.com/cvrve/Summer2025-Internships/main/README.md"
+# "https://raw.githubusercontent.com/SimplifyJobs/Summer2025-Internships/refs/heads/dev/README.md"
+GITHUB_README_URLS = [
+    "https://raw.githubusercontent.com/cvrve/Summer2025-Internships/main/README.md"
+]
 INTERNSHIP_DATA_FILE = "internships.json"
 APPLIED_JOBS_FILE = "data.json"
 
@@ -17,9 +20,12 @@ def check_applied_jobs_file():
 
 def check_internships_file():
     if not os.path.exists(INTERNSHIP_DATA_FILE) or os.path.getsize(INTERNSHIP_DATA_FILE) == 0:
-        table_data = fetch_table_from_readme()
-        table_data = replace_arrow_with_valid_company(table_data)
-        save_internship_data(table_data)
+        all_table_data = []
+        for url in GITHUB_README_URLS:
+            table_data = fetch_table_from_readme(url)
+            all_table_data.extend(table_data)
+        merged_data = merge_internship_data(all_table_data)
+        save_internship_data(merged_data)
 
 def load_applied_jobs_data():
     with open(APPLIED_JOBS_FILE, "r") as file:
@@ -37,8 +43,8 @@ def save_internship_data(data):
     with open(INTERNSHIP_DATA_FILE, "w") as file:
         json.dump(data, file)
 
-def fetch_table_from_readme():
-    response = requests.get(GITHUB_README_URL)
+def fetch_table_from_readme(url):
+    response = requests.get(url)
     if response.status_code == 200:
         readme_content = response.text.splitlines()
         table_start = None
@@ -73,6 +79,16 @@ def replace_arrow_with_valid_company(table_data):
         else:
             last_valid_company = row["Company"]
     return table_data
+
+def merge_internship_data(table_data):
+    seen = set()
+    unique_data = []
+    for row in table_data:
+        key = (row["Company"].lower(), row["Role"].lower())
+        if key not in seen:
+            seen.add(key)
+            unique_data.append(row)
+    return unique_data
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -131,7 +147,6 @@ def index():
 
     return render_template("index.html", table_data=table_data, filters=filters, result_count=result_count)
 
-
 @app.route("/update_status", methods=["POST"])
 def update_status():
     check_applied_jobs_file()
@@ -161,18 +176,19 @@ def saved_jobs():
     saved_jobs_length = saved_jobs_length if len(saved_jobs) > 1 else str(len(saved_jobs)) + " internship"
     return render_template("applied.html", saved_jobs=saved_jobs, saved_jobs_length=saved_jobs_length)
 
-
 @app.route("/refresh_internships", methods=["GET"])
 def refresh_internships():
     try:
-        table_data = fetch_table_from_readme()
-        table_data = replace_arrow_with_valid_company(table_data)
-        save_internship_data(table_data)
+        all_table_data = []
+        for url in GITHUB_README_URLS:
+            table_data = fetch_table_from_readme(url)
+            all_table_data.extend(table_data)
+        merged_data = merge_internship_data(all_table_data)
+        save_internship_data(merged_data)
         return jsonify({"success": True})
     except Exception as e:
         print(f"Error refreshing internships: {e}")
         return jsonify({"success": False})
-
 
 if __name__ == "__main__":
     app.run(debug=True)
