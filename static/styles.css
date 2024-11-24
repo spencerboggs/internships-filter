@@ -278,3 +278,7 @@ table a:hover {
     text-decoration: none;
     justify-content: center;
 }
+
+.index-button:hover {
+    background-color: #2980b9;
+}

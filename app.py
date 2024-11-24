@@ -275,9 +275,9 @@ def sankey_diagram():
     sankey_fig.update_layout(title_text="Sankey Diagram of Job Applications", font_size=10)
     sankey_html = sankey_fig.to_html(full_html=False)
 
-    saved_jobs_length = f"{len(data)} applications completed"
+    saved_jobs_length = len(data)
 
-    return render_template("sankey.html", sankey_html=sankey_html, saved_jobs_length=saved_jobs_length)
+    return render_template("sankey.html", sankey_html=sankey_html, saved_jobs_length=saved_jobs_length, interviewed=interviewed, hired=hired_from_interviewed + hired_from_not_interviewed)
 
 @app.route("/update_interview_offer", methods=["POST"])
 def update_interview_offer():

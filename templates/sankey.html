@@ -12,7 +12,7 @@
     <h1>Sankey Diagram of Applied Jobs</h1>
     <a class="index-button" href="{{ url_for('index') }}">Back to Internship Listings</a>
     <a class="index-button" href="{{ url_for('saved_jobs') }}">View Applied Jobs</a>
-    <h2>You've applied to {{ saved_jobs_length }}</h2>
+    <h2>{{ saved_jobs_length }} applications completed, {{ interviewed }} interviews, {{ hired }} offers</h2>
     <div>
         {{ sankey_html|safe }}
     </div>
