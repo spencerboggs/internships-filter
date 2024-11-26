@@ -85,10 +85,15 @@ def replace_arrow_with_valid_company(table_data):
     return table_data
 
 def merge_internship_data(table_data):
+    def normalize(text):
+        text = text.lower()
+        text = text.replace("internship", "intern")
+        return re.sub(r'\W+', '', text)
+
     seen = set()
     unique_data = []
     for row in table_data:
-        key = (row["Company"].lower(), row["Role"].lower())
+        key = (normalize(row["Company"]), normalize(row["Role"]))
         if key not in seen:
             seen.add(key)
             unique_data.append(row)
