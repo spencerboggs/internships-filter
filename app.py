@@ -106,6 +106,9 @@ def merge_internship_data(table_data):
     
     unique_data.sort(key=lambda x: (x["Parsed Date"] is None, x["Parsed Date"]), reverse=True)
 
+    month_order = ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr"]
+    unique_data.sort(key=lambda x: (month_order.index(x["Parsed Date"].strftime("%b")), x["Parsed Date"]), reverse=True)
+
     for row in unique_data:
         del row["Parsed Date"]
     
